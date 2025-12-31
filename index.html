@@ -3,80 +3,217 @@
 <head>
     <title>Resep Masakan</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .card { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 8px; display: flex; gap: 15px; align-items: center; }
-        .card img { border-radius: 5px; }
-        button { cursor: pointer; background: #ff6b6b; color: white; border: none; padding: 8px 15px; border-radius: 5px; }
-        #detail-area { background: #f9f9f9; padding: 20px; border: 2px dashed #ccc; margin-top: 20px; display: none; }
+        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; background-color: #f4f4f4; }
+        h1 { color: #333; }
+        
+        /* LOGIKA GANTI HALAMAN */
+        .halaman { display: none; } 
+        .aktif { display: block; }  
+        
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        input { display: block; width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; }
+        button:hover { opacity: 0.9; }
+        
+        .btn-blue { background: #007bff; }
+        .btn-red { background: #dc3545; }
+        .btn-gray { background: #6c757d; }
+        .link { color: #007bff; cursor: pointer; text-decoration: underline; }
+        
+        .card { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; display: flex; gap: 15px; border-radius: 8px; background: #fff; align-items: center; }
+        .card img { border-radius: 4px; }
+        
+        #api-key-result { background: #fff3cd; padding: 15px; border: 1px solid #ffeeba; display: none; margin-bottom: 20px; border-radius: 4px; }
+
+        /* AREA DETAIL RESEP (POPUP) */
+        #detail-area { 
+            background: #fff; 
+            padding: 20px; 
+            border: 2px solid #28a745; 
+            border-radius: 8px;
+            margin-top: 20px; 
+            display: none; /* Sembunyi dulu */
+            position: fixed;
+            top: 50px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 700px;
+            max-height: 80vh; overflow-y: auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            z-index: 999;
+        }
     </style>
 </head>
 <body>
-    <h1>🍲 Cari Resep Masakan</h1>
-    <input type="text" id="keyword" placeholder="Mau masak apa? (misal: Ayam)" style="padding: 8px; width: 300px;">
-    <button onclick="cariResep()">Cari</button>
 
-    <div id="detail-area">
-        <h2 id="judul-detail"></h2>
-        <img id="gambar-detail" width="200" style="margin-bottom: 10px;">
-        <h3>Bahan-bahan:</h3>
-        <ul id="list-bahan"></ul>
-        <h3>Cara Masak:</h3>
-        <p id="instruksi"></p>
-        <button onclick="tutupDetail()" style="background: #555;">Tutup</button>
+    <div class="container">
+        <div id="page-register" class="halaman aktif">
+            <h1>Daftar Akun Baru</h1>
+            <p>Daftar untuk mendapatkan akses resep masakan</p>
+            <input type="email" id="reg-email" placeholder="Masukkan Email">
+            <input type="password" id="reg-pass" placeholder="Buat Password">
+            <button onclick="doRegister()">Daftar Sekarang</button>
+            
+            <div id="api-key-result">
+                <h3>Registrasi Berhasil!</h3>
+                <p>Ini API Key Anda :</p>
+                <b id="text-apikey" style="font-size: 1.4em; color: #d9534f; background: #eee; padding: 5px;"></b>
+                <br><br>
+                <button class="btn-blue" onclick="keHalaman('page-login')">Lanjut ke Login ➡</button>
+            </div>
+            <p style="margin-top: 20px;">Sudah punya akun? <span class="link" onclick="keHalaman('page-login')">Login disini</span></p>
+        </div>
+
+        <div id="page-login" class="halaman">
+            <h1>Login Sistem</h1>
+            <p>Masukkan Email, Password, dan API Key Anda.</p>
+            <input type="email" id="login-email" placeholder="Email">
+            <input type="password" id="login-pass" placeholder="Password">
+            <input type="text" id="login-apikey" placeholder="Paste API Key Anda Disini">
+            <button class="btn-blue" onclick="doLogin()">Masuk (Login)</button>
+            <p style="margin-top: 20px;">Belum punya akun? <span class="link" onclick="keHalaman('page-register')">Daftar dulu</span></p>
+        </div>
+
+        <div id="page-dashboard" class="halaman">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
+                <h1 style="margin:0;">Resep Masakan</h1>
+                <button class="btn-red" onclick="doLogout()">Logout</button>
+            </div>
+            
+            <p>Halo, <b id="user-display">User</b>! Silakan cari resep.</p>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="keyword" placeholder="Mau masak apa? (misal: Ayam, Sate)" style="margin:0;">
+                <button onclick="cariResep()">Cari</button>
+            </div>
+
+            <div id="hasil" style="margin-top: 20px;"></div>
+        </div>
     </div>
 
-    <div id="hasil" style="margin-top: 20px;"></div>
+    <div id="detail-area">
+        <h2 id="judul-detail" style="margin-top: 0;"></h2>
+        <img id="gambar-detail" width="100%" style="max-height: 300px; object-fit: cover; border-radius: 8px;">
+        
+        <h3>Bahan-bahan:</h3>
+        <ul id="list-bahan"></ul>
+        
+        <h3>Cara Masak:</h3>
+        <div id="instruksi" style="line-height: 1.6;"></div>
+        
+        <br>
+        <button class="btn-gray" onclick="tutupDetail()">Tutup Detail</button>
+    </div>
 
     <script>
-        // 1. Fungsi Mencari Resep
-        async function cariResep() {
-            const kata = document.getElementById('keyword').value;
-            const response = await fetch(`http://localhost:3000/api/cari-resep?keyword=${kata}`);
-            const data = await response.json();
+        // --- NAVIGASI ANTAR HALAMAN ---
+        function keHalaman(id) {
+            document.querySelectorAll('.halaman').forEach(el => el.classList.remove('aktif'));
+            document.getElementById(id).classList.add('aktif');
+        }
 
-            const kotakHasil = document.getElementById('hasil');
-            kotakHasil.innerHTML = ''; 
+        // --- 1. REGISTER ---
+        async function doRegister() {
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-pass').value;
 
-            if(data.results) {
-                data.results.forEach(resep => {
-                    // Perhatikan tombol "Lihat Detail" di bawah ini
-                    kotakHasil.innerHTML += `
-                        <div class="card">
-                            <img src="${resep.image}" width="100">
-                            <div>
-                                <h3>${resep.title}</h3>
-                                <button onclick="lihatDetail(${resep.id})">Lihat Detail & Cara Masak</button>
-                            </div>
-                        </div>
-                    `;
+            if(!email || !password) { alert("Email & Password wajib diisi!"); return; }
+
+            try {
+                const res = await fetch('http://localhost:3000/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
                 });
+                const data = await res.json();
+                if(data.apiKey) {
+                    document.getElementById('api-key-result').style.display = 'block';
+                    document.getElementById('text-apikey').innerText = data.apiKey;
+                    document.querySelector('#page-register button').style.display = 'none';
+                } else { alert("Gagal: " + data.pesan); }
+            } catch (err) { alert("Server Error!"); }
+        }
+
+        // --- 2. LOGIN ---
+        async function doLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-pass').value;
+            const apiKey = document.getElementById('login-apikey').value;
+
+            try {
+                const res = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, apiKey })
+                });
+                const data = await res.json();
+                if(data.status === 'sukses') {
+                    document.getElementById('user-display').innerText = data.user.email;
+                    keHalaman('page-dashboard');
+                } else { alert(data.pesan); }
+            } catch (err) { alert("Gagal koneksi ke server."); }
+        }
+
+        // --- 3. LOGOUT ---
+        function doLogout() {
+            if(confirm("Yakin mau logout?")) {
+                keHalaman('page-login');
+                document.getElementById('login-pass').value = '';
+                document.getElementById('login-apikey').value = '';
+                // Bersihkan hasil pencarian biar bersih
+                document.getElementById('hasil').innerHTML = '';
+                document.getElementById('keyword').value = '';
             }
         }
 
-        // 2. Fungsi Melihat Detail (Diklik user)
+        // --- 4. CARI RESEP ---
+        async function cariResep() {
+            const kata = document.getElementById('keyword').value;
+            const kotak = document.getElementById('hasil');
+            kotak.innerHTML = '<p>Sedang mencari...</p>';
+
+            try {
+                const res = await fetch(`http://localhost:3000/api/cari-resep?keyword=${kata}`);
+                const data = await res.json();
+                
+                kotak.innerHTML = ''; 
+                if(data.results && data.results.length > 0) {
+                    data.results.forEach(resep => {
+                        kotak.innerHTML += `
+                            <div class="card">
+                                <img src="${resep.image}" width="100">
+                                <div style="width: 100%;">
+                                    <h3 style="margin: 0 0 5px 0;">${resep.title}</h3>
+                                    <button class="btn-blue" onclick="lihatDetail(${resep.id})" style="padding: 5px 10px; font-size: 12px;">Lihat Bahan & Cara Masak</button>
+                                </div>
+                            </div>`;
+                    });
+                } else { kotak.innerHTML = '<p>Tidak ada resep ditemukan.</p>'; }
+            } catch (err) { kotak.innerHTML = '<p>Error mengambil data.</p>'; }
+        }
+
+        // --- 5. LIHAT DETAIL (INI YANG HILANG TADI) ---
         async function lihatDetail(id) {
-            // Tampilkan loading sebentar
-            document.getElementById('detail-area').style.display = 'block';
-            document.getElementById('judul-detail').innerText = "Sedang mengambil data...";
-            
-            // Panggil server backend kita
-            const response = await fetch(`http://localhost:3000/api/detail-resep/${id}`);
-            const data = await response.json();
+            const detailArea = document.getElementById('detail-area');
+            detailArea.style.display = 'block';
+            document.getElementById('judul-detail').innerText = "Loading...";
+            document.getElementById('instruksi').innerHTML = "";
+            document.getElementById('list-bahan').innerHTML = "";
 
-            // Masukkan data ke HTML
-            document.getElementById('judul-detail').innerText = data.title;
-            document.getElementById('gambar-detail').src = data.image;
-            document.getElementById('instruksi').innerHTML = data.instructions || "Tidak ada instruksi khusus.";
+            try {
+                const res = await fetch(`http://localhost:3000/api/detail-resep/${id}`);
+                const data = await res.json();
 
-            // Masukkan bahan-bahan (Looping)
-            const listBahan = document.getElementById('list-bahan');
-            listBahan.innerHTML = '';
-            data.extendedIngredients.forEach(bahan => {
-                listBahan.innerHTML += `<li>${bahan.original}</li>`;
-            });
+                document.getElementById('judul-detail').innerText = data.title;
+                document.getElementById('gambar-detail').src = data.image;
+                document.getElementById('instruksi').innerHTML = data.instructions || "Tidak ada instruksi khusus.";
 
-            // Scroll ke atas biar kelihatan
-            window.scrollTo(0,0);
+                const listBahan = document.getElementById('list-bahan');
+                listBahan.innerHTML = '';
+                data.extendedIngredients.forEach(bahan => {
+                    listBahan.innerHTML += `<li>${bahan.original}</li>`;
+                });
+            } catch (err) {
+                alert("Gagal ambil detail resep.");
+            }
         }
 
         function tutupDetail() {
