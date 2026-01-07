@@ -1,217 +1,360 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Web Resep & Admin Panel</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resep Masakan Bank</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; background-color: #f4f4f4; }
-        .halaman { display: none; } 
-        .aktif { display: block; }  
-        .container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        :root {
+            --primary: #0f172a; 
+            --accent: #3b82f6; 
+            --text: #334155;
+            --bg: #f8fafc;
+        }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
         
-        input { display: block; width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px 20px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; margin-top: 10px; }
+        .halaman { display: none; animation: fadeIn 0.5s; }
+        .aktif { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .btn-blue { background: #007bff; }
-        .btn-red { background: #dc3545; }
-        .btn-orange { background: #fd7e14; }
-        
-        .card { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; display: flex; gap: 15px; border-radius: 8px; background: #fff; align-items: center; }
-        .link { color: #007bff; cursor: pointer; text-decoration: underline; }
-        
-        /* STYLE KHUSUS TABEL ADMIN */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        button { cursor: pointer; border: none; font-weight: bold; border-radius: 6px; transition: 0.3s; }
+        button:hover { transform: translateY(-2px); opacity: 0.9; }
+        input, select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
 
-        /* Popup Detail */
-        #detail-area { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; background: white; padding: 20px; border: 2px solid #28a745; z-index: 1000; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .logo { font-size: 24px; font-weight: 800; color: var(--primary); }
+        .nav-links button { background: transparent; color: var(--text); margin-left: 20px; font-size: 16px; }
+        .btn-cta { background: var(--accent); color: white; padding: 10px 25px; }
+
+        .hero { text-align: center; padding: 80px 20px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; }
+        .hero h1 { font-size: 48px; margin-bottom: 20px; }
+        .hero p { font-size: 20px; color: #94a3b8; max-width: 600px; margin: 0 auto 40px; }
+        .features { display: flex; justify-content: center; gap: 30px; padding: 50px; flex-wrap: wrap; }
+        .feat-card { background: white; padding: 30px; border-radius: 12px; width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: left; }
+        .feat-card h3 { color: var(--primary); margin-top: 0; }
+
+        .auth-container { max-width: 400px; margin: 50px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        .auth-container h2 { color: var(--primary); margin-bottom: 20px; }
+        .btn-block { width: 100%; padding: 12px; background: var(--primary); color: white; margin-top: 10px; }
+
+        .dashboard-container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        
+        .api-key-box { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; position: relative; }
+        .code-block { background: #1e293b; color: #a5b4fc; padding: 20px; border-radius: 8px; font-family: monospace; overflow-x: auto; margin-top: 20px; }
+        
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f1f5f9; color: var(--primary); }
+
+        #detail-area { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 600px; max-height: 80vh; overflow: auto; padding: 25px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); z-index: 1000; }
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
     </style>
 </head>
 <body>
-    <div id="overlay" onclick="tutupDetail()"></div>
 
-    <div class="container">
-        <div id="page-register" class="halaman aktif">
-            <h1>Daftar Akun</h1>
-            <input type="email" id="reg-email" placeholder="Email">
-            <input type="password" id="reg-pass" placeholder="Password">
-            <button onclick="doRegister()">Daftar</button>
-            <div id="api-key-result" style="display:none; background: #e2e3e5; padding: 10px; margin-top: 10px;">
-                <p>Copy API Key ini:</p>
-                <b id="text-apikey" style="color:red; font-size: 1.2em;"></b>
-                <br>
-                <button class="btn-blue" onclick="keHalaman('page-login')">Ke Login</button>
-            </div>
-            <p>Sudah punya akun? <span class="link" onclick="keHalaman('page-login')">Login</span></p>
+    <nav>
+        <div class="logo">Resep Bank</div>
+        <div class="nav-links">
+            <button onclick="keHalaman('page-landing')">Home</button>
+            <button onclick="keHalaman('page-login')">Login</button>
+            <button class="btn-cta" onclick="keHalaman('page-register')">Get API Key</button>
         </div>
+    </nav>
 
-        <div id="page-login" class="halaman">
-            <h1>Login</h1>
-            <p>Masukkan Email, Password, dan <b>API Key</b>.</p>
-            <input type="email" id="login-email" placeholder="Email">
-            <input type="password" id="login-pass" placeholder="Password">
-            <input type="text" id="login-apikey" placeholder="Paste API Key disini..." style="border: 2px solid #007bff;">
-            
-            <button class="btn-blue" onclick="doLogin()">Masuk</button>
-            <p>Belum punya akun? <span class="link" onclick="keHalaman('page-register')">Daftar</span></p>
+    <div id="page-landing" class="halaman aktif">
+        <div class="hero">
+            <h1>Bangun Website Resep<br>Tanpa Ribet</h1>
+            <p>Dapatkan akses ke ribuan data resep masakan se-Dunia. Cepat, Mudah, dan Gratis untuk yang sudah berlangganan.</p>
+            <button class="btn-cta" style="padding: 15px 40px; font-size: 18px;" onclick="keHalaman('page-register')">Dapatkan API Key Gratis &rarr;</button>
         </div>
-
-        <div id="page-dashboard" class="halaman">
-            <div style="display:flex; justify-content:space-between;">
-                <h3>Dashboard Resep</h3>
-                <button class="btn-red" onclick="doLogout()">Logout</button>
+        
+        <div class="features">
+            <div class="feat-card">
+                <h3>Super Cepat</h3>
+                <p>Response time di bawah 100ms. Cocok untuk aplikasi mobile dan web modern.</p>
             </div>
-            <p>Selamat datang, User!</p>
-            <input type="text" id="keyword" placeholder="Cari resep (misal: Nasi Goreng)">
-            <button onclick="cariResep()">Cari</button>
-            <div id="hasil" style="margin-top: 20px;"></div>
-        </div>
-
-        <div id="page-admin" class="halaman">
-            <div style="display:flex; justify-content:space-between; background: #333; color: white; padding: 10px; border-radius: 5px;">
-                <h3 style="margin:0;">ADMIN PANEL</h3>
-                <button class="btn-red" onclick="doLogout()">Logout</button>
+            <div class="feat-card">
+                <h3>Aman & Stabil</h3>
+                <p>Sistem otentikasi menggunakan API Key unik untuk setiap pelanggan.</p>
             </div>
-            
-            <p>Berikut adalah daftar user yang terdaftar di sistem:</p>
-            <button class="btn-orange" onclick="loadDataUser()">🔄 Refresh Data User</button>
-
-            <thead>
-                <table id="tabel-user">
-                    <tr>
-                        <th>ID</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>API Key</th>
-                    </tr>
-                    </table>
-            </thead>
+            <div class="feat-card">
+                <h3>Dokumentasi Lengkap</h3>
+                <p>Tersedia contoh codingan fetch, axios, dan curl untuk mempermudah integrasi.</p>
+            </div>
         </div>
     </div>
 
+    <div id="page-register" class="halaman">
+        <div class="auth-container">
+            <h2>Buat Akun</h2>
+            <p>Daftar sekarang untuk mendapatkan API Key.</p>
+            <input type="email" id="reg-email" placeholder="Email Address">
+            <input type="password" id="reg-pass" placeholder="Password">
+            <button class="btn-block" onclick="doRegister()">Daftar Sekarang</button>
+            
+            <div id="api-key-result" style="display:none; margin-top: 20px; background: #ecfccb; padding: 15px; border-radius: 6px; border: 1px solid #bef264;">
+                <p style="margin:0; color: #3f6212;"><b>Selamat! Ini API Key Anda:</b></p>
+                <code id="text-apikey" style="display:block; font-size: 1.2em; margin: 10px 0; font-weight:bold;">...</code>
+                <small>Simpan key ini. Gunakan untuk login.</small>
+                <button class="btn-block" style="background:#3f6212;" onclick="keHalaman('page-login')">Lanjut Login</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-login" class="halaman">
+        <div class="auth-container">
+            <h2>Login</h2>
+            <p>Masuk ke dashboard untuk mengelola akses.</p>
+            <input type="email" id="login-email" placeholder="Email">
+            <input type="password" id="login-pass" placeholder="Password">
+            <input type="text" id="login-apikey" placeholder="Paste API Key Anda">
+            <button class="btn-block" onclick="doLogin()">Masuk Dashboard</button>
+        </div>
+    </div>
+
+    <div id="page-dashboard" class="halaman">
+        <div class="dashboard-container">
+            <div class="dash-header">
+                <h2>Dashboard</h2>
+                <button onclick="doLogout()" style="color:red;">Logout</button>
+            </div>
+
+            <div class="api-key-box">
+                <h3>Your API Credential</h3>
+                <p>Gunakan key ini di header <code>x-api-key</code> setiap request.</p>
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; font-family: monospace; font-size: 1.2em; display: flex; justify-content: space-between;">
+                    <span id="display-key">LOADING...</span>
+                    <span style="font-size: 12px; opacity: 0.8;">ACTIVE</span>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div>
+                    <h3>Dokumentasi Penggunaan</h3>
+                    <p>Contoh request menggunakan JavaScript (Fetch):</p>
+                    <div class="code-block">
+fetch('http://localhost:3000/api/cari-resep?keyword=ayam', {<br>
+&nbsp;&nbsp;method: 'GET',<br>
+&nbsp;&nbsp;headers: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'x-api-key': '<span id="doc-key">YOUR_KEY</span>'<br>
+&nbsp;&nbsp;}<br>
+})
+                    </div>
+                </div>
+
+                <div>
+                    <h3>Live API Tester</h3>
+                    <p>Coba cari resep langsung dari sini:</p>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="keyword" placeholder="Contoh: Rendang" style="margin:0;">
+                        <button class="btn-cta" style="padding: 10px;" onclick="cariResep()">Test API</button>
+                    </div>
+                    <div id="hasil" style="margin-top: 15px; max-height: 300px; overflow-y: auto;">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-admin" class="halaman">
+        <div class="dashboard-container">
+            <div class="dash-header">
+                <h2 style="color: #dc2626;">Admin Control Panel</h2>
+                <button onclick="doLogout()">Logout</button>
+            </div>
+
+            <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <h4>Tambah / Edit User Manual</h4>
+                <input type="hidden" id="edit-id">
+                <div style="display: flex; gap: 10px;">
+                    <input type="email" id="adm-email" placeholder="Email User">
+                    <input type="text" id="adm-pass" placeholder="Password">
+                    <select id="adm-role">
+                        <option value="user">User Biasa</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button class="btn-cta" onclick="simpanUser()" id="btn-simpan">Simpan User</button>
+                <button onclick="batalEdit()" id="btn-batal" style="display:none; background:#cbd5e1;">Batal</button>
+            </div>
+
+            <table id="tabel-user">
+                <thead>
+                    <tr><th>ID</th><th>Email</th><th>Role</th><th>API Key</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="tbody-user"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="overlay" onclick="tutupDetail()"></div>
     <div id="detail-area">
         <h2 id="judul-detail"></h2>
-        <img id="gambar-detail" width="100%">
-        <div id="instruksi"></div>
-        <button class="btn-red" onclick="tutupDetail()">Tutup</button>
+        <img id="gambar-detail" width="100%" style="border-radius: 8px;">
+        <p id="instruksi" style="margin-top:20px; line-height: 1.6;"></p>
+        <button onclick="tutupDetail()" style="background: #dc2626; color: white; padding: 10px 20px; margin-top: 10px;">Tutup</button>
     </div>
 
     <script>
-        let CURRENT_API_KEY = ''; 
         const BASE_URL = 'http://localhost:3000';
+        let CURRENT_API_KEY = '';
 
         function keHalaman(id) {
             document.querySelectorAll('.halaman').forEach(el => el.classList.remove('aktif'));
             document.getElementById(id).classList.add('aktif');
         }
 
-        // --- FUNGSI LOGIN (SUDAH DI-UPGRADE) ---
+        async function doRegister() {
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-pass').value;
+            try {
+                const res = await fetch(BASE_URL + '/api/auth/register', {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await res.json();
+                if(data.data) {
+                    document.getElementById('api-key-result').style.display = 'block';
+                    document.getElementById('text-apikey').innerText = data.data.apiKey;
+                    document.getElementById('reg-email').disabled = true;
+                } else alert(data.pesan);
+            } catch(e) { alert("Server Error! Pastikan server.js jalan."); }
+        }
+
         async function doLogin() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-pass').value;
             const apiKey = document.getElementById('login-apikey').value;
-
-            const res = await fetch(`${BASE_URL}/api/auth/login`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, apiKey })
-            });
-            const data = await res.json();
             
-            if(data.status === 'sukses') {
-                CURRENT_API_KEY = data.user.api_key; // Simpan kunci
-                
-                // --- LOGIKA PEMISAH (USER vs ADMIN) ---
-                if (data.user.role === 'admin') {
-                    // Kalau Admin -> Masuk ke Halaman Admin & Load Data User
-                    keHalaman('page-admin');
-                    loadDataUser(); 
-                } else {
-                    // Kalau User Biasa -> Masuk ke Halaman Resep
-                    keHalaman('page-dashboard');
-                }
-
-            } else { alert(data.pesan); }
-        }
-
-        // --- FUNGSI KHUSUS ADMIN: LOAD DATA USER ---
-        async function loadDataUser() {
-            // Kita pakai API Key Admin buat request data rahasia ini
-            const res = await fetch(`${BASE_URL}/api/admin/users`, {
-                headers: { 'x-api-key': CURRENT_API_KEY } 
-            });
-
-            if (res.status === 403) {
-                alert("Anda bukan Admin!"); return;
-            }
-
-            const data = await res.json();
-            const tabel = document.getElementById('tabel-user');
-            
-            // Reset tabel (sisakan header)
-            tabel.innerHTML = `<tr><th>ID</th><th>Email</th><th>Role</th><th>API Key</th></tr>`;
-
-            data.data.forEach(u => {
-                tabel.innerHTML += `
-                    <tr>
-                        <td>${u.id}</td>
-                        <td>${u.email}</td>
-                        <td><b>${u.role}</b></td>
-                        <td style="font-family:monospace; color:red;">${u.api_key}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        // --- REGISTER USER ---
-        async function doRegister() {
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-pass').value;
-            const res = await fetch(`${BASE_URL}/api/auth/register`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-            const data = await res.json();
-            if(data.data) {
-                document.getElementById('api-key-result').style.display = 'block';
-                document.getElementById('text-apikey').innerText = data.data.apiKey;
-            } else { alert(data.pesan); }
-        }
-
-        // --- CARI RESEP ---
-        async function cariResep() {
-            const keyword = document.getElementById('keyword').value;
-            const res = await fetch(`${BASE_URL}/api/cari-resep?keyword=${keyword}`, {
-                headers: { 'x-api-key': CURRENT_API_KEY }
-            });
-            const data = await res.json();
-            const kotak = document.getElementById('hasil');
-            kotak.innerHTML = '';
-            if(data.results) {
-                data.results.forEach(r => {
-                    kotak.innerHTML += `<div class="card">
-                        <img src="${r.image}" width="80">
-                        <div><b>${r.title}</b><br><button class="btn-blue" onclick="lihatDetail(${r.id})">Lihat</button></div>
-                    </div>`;
+            try {
+                const res = await fetch(BASE_URL + '/api/auth/login', {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({email, password, apiKey})
                 });
-            }
+                const data = await res.json();
+                
+                if(data.status === 'sukses') {
+                    CURRENT_API_KEY = data.user.api_key;
+                    
+                    if(data.user.role === 'admin') {
+                        keHalaman('page-admin');
+                        loadUsers();
+                    } else {
+                        document.getElementById('display-key').innerText = CURRENT_API_KEY;
+                        document.getElementById('doc-key').innerText = CURRENT_API_KEY;
+                        keHalaman('page-dashboard');
+                    }
+                } else alert(data.pesan);
+            } catch(e) { alert("Gagal koneksi ke server."); }
         }
 
-        function doLogout() { CURRENT_API_KEY = ''; keHalaman('page-login'); }
+        function doLogout() {
+            CURRENT_API_KEY = '';
+            keHalaman('page-landing'); 
+            document.getElementById('login-pass').value = '';
+            document.getElementById('hasil').innerHTML = '';
+        }
 
-        async function lihatDetail(id) {
-            const res = await fetch(`${BASE_URL}/api/detail-resep/${id}`, { headers: { 'x-api-key': CURRENT_API_KEY } });
+        async function cariResep() {
+            const k = document.getElementById('keyword').value;
+            const div = document.getElementById('hasil');
+            div.innerHTML = 'Loading...';
+            
+            try {
+                const res = await fetch(BASE_URL + '/api/cari-resep?keyword='+k, {
+                    headers:{'x-api-key':CURRENT_API_KEY}
+                });
+                const data = await res.json();
+                div.innerHTML = '';
+                
+                if(data.results) {
+                    data.results.forEach(r => {
+                        div.innerHTML += `
+                        <div style="background:#f8fafc; padding:10px; margin-bottom:10px; border-radius:6px; display:flex; align-items:center; gap:10px; border:1px solid #e2e8f0;">
+                            <img src="${r.image}" width="60" style="border-radius:4px;">
+                            <div style="flex:1;"><b>${r.title}</b></div>
+                            <button onclick="lihat(${r.id})" style="background:#3b82f6; color:white; padding:5px 10px; font-size:12px;">Detail</button>
+                        </div>`;
+                    });
+                } else { div.innerHTML = 'Tidak ditemukan.'; }
+            } catch(e) { div.innerHTML = 'Error: ' + e.message; }
+        }
+
+        async function lihat(id) {
+            const res = await fetch(BASE_URL + '/api/detail-resep/'+id, {headers:{'x-api-key':CURRENT_API_KEY}});
             const data = await res.json();
-            document.getElementById('judul-detail').innerText = data.title;
-            document.getElementById('gambar-detail').src = data.image;
-            document.getElementById('instruksi').innerHTML = data.instructions || "Gak ada instruksi";
+            
             document.getElementById('detail-area').style.display = 'block';
             document.getElementById('overlay').style.display = 'block';
+            document.getElementById('judul-detail').innerText = data.title;
+            document.getElementById('gambar-detail').src = data.image;
+            document.getElementById('instruksi').innerHTML = data.instructions || "<i>No instructions provided.</i>";
         }
-
+        
         function tutupDetail() {
             document.getElementById('detail-area').style.display = 'none';
             document.getElementById('overlay').style.display = 'none';
+        }
+
+        async function loadUsers() {
+            const res = await fetch(BASE_URL + '/api/admin/users', { headers: {'x-api-key': CURRENT_API_KEY} });
+            const data = await res.json();
+            const tbody = document.getElementById('tbody-user');
+            tbody.innerHTML = '';
+            data.data.forEach(u => {
+                tbody.innerHTML += `<tr>
+                    <td>${u.id}</td>
+                    <td>${u.email}</td>
+                    <td><b>${u.role}</b></td>
+                    <td style="font-family:monospace; font-size:12px;">${u.api_key.substring(0,10)}...</td>
+                    <td>
+                        <button onclick="modeEdit('${u.id}','${u.email}','${u.password}','${u.role}')" style="color:#eab308;">Edit</button>
+                        <button onclick="hapusUser(${u.id})" style="color:#dc2626; margin-left:5px;">Hapus</button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        async function simpanUser() {
+            const id = document.getElementById('edit-id').value;
+            const email = document.getElementById('adm-email').value;
+            const password = document.getElementById('adm-pass').value;
+            const role = document.getElementById('adm-role').value;
+            
+            const url = id ? `${BASE_URL}/api/admin/users/${id}` : `${BASE_URL}/api/admin/users`;
+            const method = id ? 'PUT' : 'POST';
+
+            await fetch(url, {
+                method: method,
+                headers: {'Content-Type':'application/json', 'x-api-key': CURRENT_API_KEY},
+                body: JSON.stringify({email, password, role})
+            });
+            loadUsers(); batalEdit();
+        }
+
+        async function hapusUser(id) {
+            if(confirm('Hapus user ini?')) {
+                await fetch(`${BASE_URL}/api/admin/users/${id}`, {method:'DELETE', headers:{'x-api-key':CURRENT_API_KEY}});
+                loadUsers();
+            }
+        }
+
+        function modeEdit(id, email, password, role) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('adm-email').value = email;
+            document.getElementById('adm-pass').value = password;
+            document.getElementById('adm-role').value = role;
+            document.getElementById('btn-simpan').innerText = "Update";
+            document.getElementById('btn-batal').style.display = "inline-block";
+        }
+
+        function batalEdit() {
+            document.getElementById('edit-id').value = "";
+            document.getElementById('adm-email').value = "";
+            document.getElementById('adm-pass').value = "";
+            document.getElementById('btn-simpan').innerText = "Simpan User";
+            document.getElementById('btn-batal').style.display = "none";
         }
     </script>
 </body>
