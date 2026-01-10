@@ -24,7 +24,7 @@
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d1bc1f88-5042-4dd6-853e-8d9eb63ab275" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ded1935f-9dbd-4e43-bda7-cda906d01a91" />
 
-# client page
+# client page (client membuat web dari Generated Request Code)
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8be25dfc-e5a3-4a46-8eea-2cf3427a911e" />
 
 # bukti api key spoonacular (mengambil data)
