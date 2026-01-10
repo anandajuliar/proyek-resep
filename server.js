@@ -8,12 +8,11 @@ const app = express();
 app.use(cors());
 app.use(express.json()); 
 
-// --- KONFIGURASI ---
-const MY_SPOONACULAR_KEY = '221763f9a87e4d64972ed240148f41d2'; 
+const MY_SPOONACULAR_KEY = '221763f9a87e4d64972ed240148f41d2'; //api yg aku create dari spoonacular buat ambil data
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',      
-    password: 'Akusukses15!', // Sesuaikan password DB kamu
+    password: 'Akusukses15!', 
     database: 'resep_db'
 });
 
@@ -22,7 +21,6 @@ db.connect((err) => {
     else console.log('✅ Terkoneksi ke Database MySQL!');
 });
 
-// --- MIDDLEWARE: CEK API KEY ---
 const cekApiKey = (req, res, next) => {
     const apiKey = req.headers['x-api-key'];
     if (!apiKey) return res.status(401).json({ pesan: 'Mana API Key-nya? (Header x-api-key kosong)' });
@@ -37,9 +35,6 @@ const cekApiKey = (req, res, next) => {
     });
 };
 
-// --- ROUTES AUTH ---
-
-// 1. REGISTER
 app.post('/api/auth/register', (req, res) => {
     const { email, password } = req.body;
     const userApiKey = crypto.randomBytes(16).toString('hex');
@@ -54,9 +49,8 @@ app.post('/api/auth/register', (req, res) => {
     });
 });
 
-// 2. LOGIN (PAKAI CEK API KEY)
 app.post('/api/auth/login', (req, res) => {
-    const { email, password, apiKey } = req.body; // Terima API Key dari input user
+    const { email, password, apiKey } = req.body; 
 
     const sql = 'SELECT * FROM users WHERE email = ? AND password = ? AND api_key = ?';
     db.query(sql, [email, password, apiKey], (err, results) => {
@@ -70,9 +64,7 @@ app.post('/api/auth/login', (req, res) => {
     });
 });
 
-// --- ROUTES DATA (Client User Web Lain) ---
 
-// 3. CARI RESEP
 app.get('/api/cari-resep', cekApiKey, async (req, res) => {
     try {
         const keywordUser = req.query.keyword;
@@ -85,7 +77,6 @@ app.get('/api/cari-resep', cekApiKey, async (req, res) => {
     }
 });
 
-// 4. DETAIL RESEP
 app.get('/api/detail-resep/:id', cekApiKey, async (req, res) => {
     try {
         const idResep = req.params.id;
@@ -97,7 +88,6 @@ app.get('/api/detail-resep/:id', cekApiKey, async (req, res) => {
     }
 });
 
-// --- ROUTES ADMIN ---
 app.get('/api/admin/users', cekApiKey, (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ pesan: "Bukan Admin!" });
 

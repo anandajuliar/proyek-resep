@@ -45,14 +45,14 @@
         .api-key-box { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; position: relative; }
         .code-block { 
             background: #1e293b; 
-            color: #4ade80; /* HIJAU */
+            color: #4ade80;
             padding: 20px; 
             border-radius: 8px; 
             font-family: 'Consolas', 'Monaco', monospace; 
             overflow-x: auto; 
             margin-top: 10px; 
             font-size: 14px;
-            white-space: pre; /* WAJIB ADA: Biar enter & spasi kebaca */
+            white-space: pre; 
             border: 1px solid #334155;
             text-align: left;
             line-height: 1.5;
@@ -62,7 +62,6 @@
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
         th { background: #f1f5f9; color: var(--primary); }
 
-        /* CSS untuk Halaman Explorer Baru */
         .explorer-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
         #detail-area { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 600px; max-height: 80vh; overflow: auto; padding: 25px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); z-index: 1000; }
@@ -210,7 +209,7 @@
         let CURRENT_API_KEY = '';
         let SESSION_USER = null;
 
-        // --- AUTO LOGIN (SOLUSI BIAR GAK CAPEK) ---
+        //auto logib
         window.onload = function() {
             const savedUser = localStorage.getItem('user_session');
             if(savedUser) {
@@ -306,7 +305,7 @@
         function doLogout() {
             CURRENT_API_KEY = '';
             SESSION_USER = null;
-            localStorage.removeItem('user_session'); // HAPUS SESSION
+            localStorage.removeItem('user_session'); 
             
             document.getElementById('btn-login-nav').innerText = "Login";
             document.getElementById('btn-login-nav').setAttribute('onclick', "keHalaman('page-login')");
@@ -317,7 +316,6 @@
             document.getElementById('hasil').innerHTML = '';
         }
 
-        // --- FUNGSI CARI DI DASHBOARD (CODE LAMA TETAP JALAN) ---
         async function cariResep() {
             const k = document.getElementById('keyword').value;
             const div = document.getElementById('hasil');
@@ -343,20 +341,18 @@
             } catch(e) { div.innerHTML = 'Error: ' + e.message; }
         }
 
-        // --- FUNGSI CARI DI API EXPLORER (HALAMAN BARU) ---
         async function testExplorer() {
     // 1. Ambil nilai dari input
     const key = document.getElementById('exp-key').value;
     const kw = document.getElementById('exp-kw').value;
     const resBox = document.getElementById('exp-result');
-    const codeBox = document.getElementById('generated-code'); // Ambil kotak kode baru
+    const codeBox = document.getElementById('generated-code'); 
 
     if(!key || !kw) return alert("Masukkan API Key dan Keyword!");
 
     resBox.innerHTML = "Requesting...";
     
-    // 2. TAMPILKAN KODINGAN FETCH DINAMIS (Sesuai Request)
-    codeBox.style.display = 'block'; // Munculkan kotaknya
+    codeBox.style.display = 'block'; 
     codeBox.innerText = `
 fetch('${BASE_URL}/api/cari-resep?keyword=${kw}', {
   method: 'GET',
