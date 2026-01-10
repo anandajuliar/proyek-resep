@@ -21,14 +21,10 @@
         button:hover { transform: translateY(-2px); opacity: 0.9; }
         input, select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
 
-        /* NAVBAR (5 TOMBOL) */
         nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 50px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 24px; font-weight: 800; color: var(--primary); }
-        
         .nav-links button { background: transparent; color: var(--text); margin-left: 10px; font-size: 15px; padding: 8px 15px; }
         .nav-links button:hover { background: #f1f5f9; border-radius: 6px; color: var(--accent); }
-        
-        /* Tombol Login Beda Sendiri */
         .btn-login { background: var(--accent) !important; color: white !important; border-radius: 30px !important; }
         .btn-cta { background: var(--accent); color: white; padding: 10px 25px; }
 
@@ -47,7 +43,20 @@
         .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         
         .api-key-box { background: linear-gradient(to right, #3b82f6, #2563eb); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; position: relative; }
-        .code-block { background: #1e293b; color: #a5b4fc; padding: 20px; border-radius: 8px; font-family: monospace; overflow-x: auto; margin-top: 20px; }
+        .code-block { 
+            background: #1e293b; 
+            color: #4ade80; /* HIJAU */
+            padding: 20px; 
+            border-radius: 8px; 
+            font-family: 'Consolas', 'Monaco', monospace; 
+            overflow-x: auto; 
+            margin-top: 10px; 
+            font-size: 14px;
+            white-space: pre; /* WAJIB ADA: Biar enter & spasi kebaca */
+            border: 1px solid #334155;
+            text-align: left;
+            line-height: 1.5;
+        }
         
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
@@ -91,7 +100,6 @@
         <div class="dashboard-container">
             <div style="text-align: center; margin-bottom: 30px;">
                 <h2>Interactive API Explorer</h2>
-                <p style="color:#64748b">Halaman khusus untuk testing endpoint.</p>
             </div>
             <div class="explorer-box">
                 <h4>Parameter Request</h4>
@@ -101,8 +109,8 @@
                 <h4 style="margin-top: 20px;">Generated Request Code:</h4>
     <div id="generated-code" class="code-block" style="display:none; margin-bottom: 20px;">
         </div>
-    <div id="exp-result" style="">
-        Hasil JSON akan muncul di sini...
+    <div id="exp-result" class="code-block" style="max-height: 500px;">
+    Hasil JSON akan muncul di sini...
     </div>
                 
             </div>
