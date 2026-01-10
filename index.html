@@ -13,7 +13,7 @@
         }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
         
-        .halaman { display: none; animation: fadeIn 0.5s; }
+        .halaman { display: none; animation: fadeIn 0.4s; }
         .aktif { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -21,9 +21,15 @@
         button:hover { transform: translateY(-2px); opacity: 0.9; }
         input, select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
 
-        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        /* NAVBAR (5 TOMBOL) */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 50px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 24px; font-weight: 800; color: var(--primary); }
-        .nav-links button { background: transparent; color: var(--text); margin-left: 20px; font-size: 16px; }
+        
+        .nav-links button { background: transparent; color: var(--text); margin-left: 10px; font-size: 15px; padding: 8px 15px; }
+        .nav-links button:hover { background: #f1f5f9; border-radius: 6px; color: var(--accent); }
+        
+        /* Tombol Login Beda Sendiri */
+        .btn-login { background: var(--accent) !important; color: white !important; border-radius: 30px !important; }
         .btn-cta { background: var(--accent); color: white; padding: 10px 25px; }
 
         .hero { text-align: center; padding: 80px 20px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; }
@@ -47,6 +53,9 @@
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
         th { background: #f1f5f9; color: var(--primary); }
 
+        /* CSS untuk Halaman Explorer Baru */
+        .explorer-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+
         #detail-area { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 600px; max-height: 80vh; overflow: auto; padding: 25px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); z-index: 1000; }
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
     </style>
@@ -57,30 +66,45 @@
         <div class="logo">Resep Bank</div>
         <div class="nav-links">
             <button onclick="keHalaman('page-landing')">Home</button>
-            <button onclick="keHalaman('page-login')">Login</button>
-            <button class="btn-cta" onclick="keHalaman('page-register')">Get API Key</button>
+            <button onclick="keHalaman('page-explorer')">API Explorer</button>
+            <button onclick="cekDashboard()">Dashboard</button>
+            <button onclick="keHalaman('page-register')">Daftar</button>
+            <button class="btn-login" id="btn-login-nav" onclick="keHalaman('page-login')">Login</button>
         </div>
     </nav>
 
     <div id="page-landing" class="halaman aktif">
         <div class="hero">
             <h1>Bangun Website Resep<br>Tanpa Ribet</h1>
-            <p>Dapatkan akses ke ribuan data resep masakan se-Dunia. Cepat, Mudah, dan Gratis untuk yang sudah berlangganan.</p>
+            <p>Dapatkan akses ke ribuan data resep masakan se-Dunia. Cepat, Mudah, dan Gratis.</p>
             <button class="btn-cta" style="padding: 15px 40px; font-size: 18px;" onclick="keHalaman('page-register')">Dapatkan API Key Gratis &rarr;</button>
         </div>
         
         <div class="features">
-            <div class="feat-card">
-                <h3>Super Cepat</h3>
-                <p>Response time di bawah 100ms. Cocok untuk aplikasi mobile dan web modern.</p>
+            <div class="feat-card"><h3>Super Cepat</h3><p>Response time di bawah 100ms.</p></div>
+            <div class="feat-card"><h3>Aman & Stabil</h3><p>Sistem otentikasi menggunakan API Key unik.</p></div>
+            <div class="feat-card"><h3>Dokumentasi Lengkap</h3><p>Tersedia contoh fetch dan axios.</p></div>
+        </div>
+    </div>
+
+    <div id="page-explorer" class="halaman">
+        <div class="dashboard-container">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2>Interactive API Explorer</h2>
+                <p style="color:#64748b">Halaman khusus untuk testing endpoint.</p>
             </div>
-            <div class="feat-card">
-                <h3>Aman & Stabil</h3>
-                <p>Sistem otentikasi menggunakan API Key unik untuk setiap pelanggan.</p>
-            </div>
-            <div class="feat-card">
-                <h3>Dokumentasi Lengkap</h3>
-                <p>Tersedia contoh codingan fetch, axios, dan curl untuk mempermudah integrasi.</p>
+            <div class="explorer-box">
+                <h4>Parameter Request</h4>
+                <input type="text" id="exp-key" placeholder="Paste API Key Anda...">
+                <input type="text" id="exp-kw" placeholder="Keyword (contoh: Rendang)">
+                <button class="btn-block" onclick="testExplorer()">Cari Resep (Explorer Mode)</button>
+                <h4 style="margin-top: 20px;">Generated Request Code:</h4>
+    <div id="generated-code" class="code-block" style="display:none; margin-bottom: 20px;">
+        </div>
+    <div id="exp-result" style="">
+        Hasil JSON akan muncul di sini...
+    </div>
+                
             </div>
         </div>
     </div>
@@ -128,30 +152,14 @@
                     <span style="font-size: 12px; opacity: 0.8;">ACTIVE</span>
                 </div>
             </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                <div>
-                    <h3>Dokumentasi Penggunaan</h3>
-                    <p>Contoh request menggunakan JavaScript (Fetch):</p>
-                    <div class="code-block">
-fetch('http://localhost:3000/api/cari-resep?keyword=ayam', {<br>
-&nbsp;&nbsp;method: 'GET',<br>
-&nbsp;&nbsp;headers: {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;'x-api-key': '<span id="doc-key">YOUR_KEY</span>'<br>
-&nbsp;&nbsp;}<br>
-})
-                    </div>
+            <div>
+                <h3>Live API Tester</h3>
+                <p>Coba cari resep langsung dari sini:</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="keyword" placeholder="Contoh: Rendang" style="margin:0;">
+                    <button class="btn-cta" style="padding: 10px;" onclick="cariResep()">Test API</button>
                 </div>
-
-                <div>
-                    <h3>Live API Tester</h3>
-                    <p>Coba cari resep langsung dari sini:</p>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="keyword" placeholder="Contoh: Rendang" style="margin:0;">
-                        <button class="btn-cta" style="padding: 10px;" onclick="cariResep()">Test API</button>
-                    </div>
-                    <div id="hasil" style="margin-top: 15px; max-height: 300px; overflow-y: auto;">
-                        </div>
+                    <div id="hasil" style="margin-top: 15px; max-height: 300px; overflow-y: auto;"></div>
                 </div>
             </div>
         </div>
@@ -163,26 +171,19 @@ fetch('http://localhost:3000/api/cari-resep?keyword=ayam', {<br>
                 <h2 style="color: #dc2626;">Admin Control Panel</h2>
                 <button onclick="doLogout()">Logout</button>
             </div>
-
             <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                 <h4>Tambah / Edit User Manual</h4>
                 <input type="hidden" id="edit-id">
                 <div style="display: flex; gap: 10px;">
                     <input type="email" id="adm-email" placeholder="Email User">
                     <input type="text" id="adm-pass" placeholder="Password">
-                    <select id="adm-role">
-                        <option value="user">User Biasa</option>
-                        <option value="admin">Admin</option>
-                    </select>
+                    <select id="adm-role"><option value="user">User Biasa</option><option value="admin">Admin</option></select>
                 </div>
                 <button class="btn-cta" onclick="simpanUser()" id="btn-simpan">Simpan User</button>
                 <button onclick="batalEdit()" id="btn-batal" style="display:none; background:#cbd5e1;">Batal</button>
             </div>
-
             <table id="tabel-user">
-                <thead>
-                    <tr><th>ID</th><th>Email</th><th>Role</th><th>API Key</th><th>Aksi</th></tr>
-                </thead>
+                <thead><tr><th>ID</th><th>Email</th><th>Role</th><th>API Key</th><th>Aksi</th></tr></thead>
                 <tbody id="tbody-user"></tbody>
             </table>
         </div>
@@ -199,10 +200,46 @@ fetch('http://localhost:3000/api/cari-resep?keyword=ayam', {<br>
     <script>
         const BASE_URL = 'http://localhost:3000';
         let CURRENT_API_KEY = '';
+        let SESSION_USER = null;
+
+        // --- AUTO LOGIN (SOLUSI BIAR GAK CAPEK) ---
+        window.onload = function() {
+            const savedUser = localStorage.getItem('user_session');
+            if(savedUser) {
+                SESSION_USER = JSON.parse(savedUser);
+                CURRENT_API_KEY = SESSION_USER.api_key;
+                
+                // Update UI Otomatis
+                document.getElementById('btn-login-nav').innerText = "Logout";
+                document.getElementById('btn-login-nav').setAttribute('onclick', 'doLogout()');
+                document.getElementById('btn-login-nav').style.background = "red";
+                
+                if(SESSION_USER.role === 'user') {
+                    document.getElementById('display-key').innerText = CURRENT_API_KEY;
+                    document.getElementById('doc-key').innerText = CURRENT_API_KEY;
+                    document.getElementById('exp-key').value = CURRENT_API_KEY; // Auto fill explorer
+                }
+            }
+        }
 
         function keHalaman(id) {
             document.querySelectorAll('.halaman').forEach(el => el.classList.remove('aktif'));
             document.getElementById(id).classList.add('aktif');
+            window.scrollTo(0,0);
+        }
+
+        function cekDashboard() {
+            if(!SESSION_USER) {
+                alert("Silakan Login terlebih dahulu!");
+                keHalaman('page-login');
+            } else {
+                if(SESSION_USER.role === 'admin') {
+                    keHalaman('page-admin');
+                    loadUsers();
+                } else {
+                    keHalaman('page-dashboard');
+                }
+            }
         }
 
         async function doRegister() {
@@ -235,7 +272,15 @@ fetch('http://localhost:3000/api/cari-resep?keyword=ayam', {<br>
                 const data = await res.json();
                 
                 if(data.status === 'sukses') {
+                    SESSION_USER = data.user;
                     CURRENT_API_KEY = data.user.api_key;
+                    
+                    // SIMPAN SESSION (BIAR GAK ILANG)
+                    localStorage.setItem('user_session', JSON.stringify(SESSION_USER));
+
+                    document.getElementById('btn-login-nav').innerText = "Logout";
+                    document.getElementById('btn-login-nav').setAttribute('onclick', 'doLogout()');
+                    document.getElementById('btn-login-nav').style.background = "red";
                     
                     if(data.user.role === 'admin') {
                         keHalaman('page-admin');
@@ -243,6 +288,7 @@ fetch('http://localhost:3000/api/cari-resep?keyword=ayam', {<br>
                     } else {
                         document.getElementById('display-key').innerText = CURRENT_API_KEY;
                         document.getElementById('doc-key').innerText = CURRENT_API_KEY;
+                        document.getElementById('exp-key').value = CURRENT_API_KEY;
                         keHalaman('page-dashboard');
                     }
                 } else alert(data.pesan);
@@ -251,11 +297,19 @@ fetch('http://localhost:3000/api/cari-resep?keyword=ayam', {<br>
 
         function doLogout() {
             CURRENT_API_KEY = '';
+            SESSION_USER = null;
+            localStorage.removeItem('user_session'); // HAPUS SESSION
+            
+            document.getElementById('btn-login-nav').innerText = "Login";
+            document.getElementById('btn-login-nav').setAttribute('onclick', "keHalaman('page-login')");
+            document.getElementById('btn-login-nav').style.background = "#3b82f6";
+
             keHalaman('page-landing'); 
             document.getElementById('login-pass').value = '';
             document.getElementById('hasil').innerHTML = '';
         }
 
+        // --- FUNGSI CARI DI DASHBOARD (CODE LAMA TETAP JALAN) ---
         async function cariResep() {
             const k = document.getElementById('keyword').value;
             const div = document.getElementById('hasil');
@@ -280,6 +334,42 @@ fetch('http://localhost:3000/api/cari-resep?keyword=ayam', {<br>
                 } else { div.innerHTML = 'Tidak ditemukan.'; }
             } catch(e) { div.innerHTML = 'Error: ' + e.message; }
         }
+
+        // --- FUNGSI CARI DI API EXPLORER (HALAMAN BARU) ---
+        async function testExplorer() {
+    // 1. Ambil nilai dari input
+    const key = document.getElementById('exp-key').value;
+    const kw = document.getElementById('exp-kw').value;
+    const resBox = document.getElementById('exp-result');
+    const codeBox = document.getElementById('generated-code'); // Ambil kotak kode baru
+
+    if(!key || !kw) return alert("Masukkan API Key dan Keyword!");
+
+    resBox.innerHTML = "Requesting...";
+    
+    // 2. TAMPILKAN KODINGAN FETCH DINAMIS (Sesuai Request)
+    codeBox.style.display = 'block'; // Munculkan kotaknya
+    codeBox.innerText = `
+fetch('${BASE_URL}/api/cari-resep?keyword=${kw}', {
+  method: 'GET',
+  headers: {
+    'x-api-key': '${key}'
+  }
+})`;
+
+    // 3. Jalankan Request Asli ke Server
+    try {
+        const res = await fetch(BASE_URL + '/api/cari-resep?keyword='+kw, {
+            headers:{'x-api-key':key}
+        });
+        const data = await res.json();
+        
+        // Tampilkan hasil JSON
+        resBox.innerHTML = JSON.stringify(data, null, 2);
+    } catch(e) { 
+        resBox.innerHTML = "Error: " + e.message; 
+    }
+}
 
         async function lihat(id) {
             const res = await fetch(BASE_URL + '/api/detail-resep/'+id, {headers:{'x-api-key':CURRENT_API_KEY}});
